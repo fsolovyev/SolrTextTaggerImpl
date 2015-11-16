@@ -48,7 +48,7 @@ public class SolrTextTaggerImpl {
             ExecutorService exService = Executors.newFixedThreadPool(5);
             while ((line = br.readLine()) != null) {
 
-                    Future<String> tagFileString = exService.submit(new TagFileStringCallable(fields, line, solr));
+                    Future<String> tagFileString = exService.submit(new TagFileLineCallable(fields, line, solr));
                     try {
                         tagsList.add(tagFileString.get());
                     } catch (InterruptedException e) {
