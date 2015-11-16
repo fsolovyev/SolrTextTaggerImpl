@@ -42,22 +42,27 @@ public class SolrTextTaggerImpl {
         String csvFile = "/Path/to/input/csv/file.csv";
         BufferedReader br = null;
         String line = "";
-        List<String> tagsList = new ArrayList<>();
+        List<String> tagList = new ArrayList<>();
         try {
             br = new BufferedReader(new FileReader(csvFile));
             ExecutorService exService = Executors.newFixedThreadPool(5);
+            List<Future<String>> futureTagList = new ArrayList<>();
             while ((line = br.readLine()) != null) {
-
                     Future<String> tagFileString = exService.submit(new TagFileLineCallable(fields, line, solr));
-                    try {
-                        tagsList.add(tagFileString.get());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-
+                    futureTagList.add(tagFileString);
             }
+
+            futureTagList.forEach(tagFileString ->
+                    {
+                        try {
+                            tagList.add(tagFileString.get());
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+            );
 
             exService.shutdown();
             try {
@@ -79,7 +84,7 @@ public class SolrTextTaggerImpl {
                 }
             }
         }
-        return tagsList;
+        return tagList;
     }
 
 
